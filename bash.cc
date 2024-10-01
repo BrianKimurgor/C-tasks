@@ -57,19 +57,30 @@ int main(int argc, char *argv[])
  */
 void doline(struct command *pcmd)
 {
-    if (pcmd == NULL) {
-        cout << "No command to process\n";
-        return;
-    }
+    int line_number = 1;
+    while (pcmd != NULL) {
+        printf("========== line %d ==========\n", line_number);
+        printf("Command name: '%s'\n", pcmd->command);
+        
+        // Display arguments
+        int i = 0;
+        struct args *parg = pcmd->args;
+        while (parg != NULL) {
+            printf("argv[%d]: '%s'\n", i++, parg->arg);
+            parg = parg->next;
+        }
 
-    if (pcmd->next) {
-        // If there is a pipeline, handle it
-        execute_pipeline(pcmd);
-    } else {
-        // If there is no pipeline, execute a single command
-        execute_command(pcmd);
+        // Handle stdin, stdout, and stderr redirection
+        printf("stdin: %s\n", pcmd->infile ? pcmd->infile : "UNDIRECTED");
+        printf("stdout: %s\n", pcmd->outfile ? pcmd->outfile : "UNDIRECTED");
+        printf("stderr: %s\n", pcmd->errfile ? (pcmd->error_append ? pcmd->errfile : pcmd->errfile) : "UNDIRECTED");
+
+        // Check if there is another command in the pipeline
+        pcmd = pcmd->next;
+        line_number++;
     }
 }
+
 
 /*
  * execute_command - executes a single command with its arguments and redirections

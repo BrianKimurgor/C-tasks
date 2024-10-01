@@ -33,6 +33,7 @@ struct command {
     struct command *next;   // Pointer to the next command in a pipeline
 };
 
+
 /* externals */
 extern int yydebug;
 extern int debug;
