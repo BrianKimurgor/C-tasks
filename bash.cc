@@ -29,17 +29,27 @@ void execute_command(struct command *pcmd);
 void execute_pipeline(struct command *pcmd);
 void handle_redirections(struct redirs *redirection);
 
-// Main entry point
+// Main entry pointint main(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     if (debug)
-        yydebug = 1;  /* turn on ugly YACC debugging */
+        yydebug = 1;  /* turn on YACC debugging if needed */
 
-    /* parse the input file */
-    yyparse();
+    // Infinite loop to keep the shell running
+    while (1) {
+        printf("> ");  // Print the prompt
+        fflush(stdout);  // Ensure the prompt is printed immediately
 
-    exit(0);
+        // Parse the input
+        if (yyparse() != 0) {
+            printf("Parsing error occurred!\n");
+        }
+    }
+
+    return 0;
 }
+
+
 
 /*
  * doline - function called after parsing each line
