@@ -2,7 +2,7 @@
 /*
  * Simple example lex input file
  *
- * Shawn Ostermann -- Sept 18,2024
+ * Shawn Ostermann -- Sept 18, 2024
  *
  * Headstart version
  */
@@ -24,40 +24,26 @@ extern int debug;
 %}
 
 
-
 /* The rest of this after the '%%' is lex rules */
 %%
 
-[ \t]+	        { }  /* Just ignore white space */
+[ \t]+            { }  /* Just ignore white space */
 
-"\n" 	        { return(EOLN); } 
+"\n"              { return(EOLN); }
 
-%{
-/* this rule will get you "started" with the WORD token.  As you work on the project,
-   you'll need to update it to support other characters too... */
-%}
-[a-zA-Z]+ {
-    /* a "WORD" - will need to be modified */
-    if (debug)
-        printf("scanner saw WORD '%s'\n", yytext);
-    yylval.string = strdup(yytext);  /* make a copy of the string */
-    return(WORD);
-}
+"|"               { return(PIPE); }
 
+"<"               { return(INFILE); }
 
+">>"              { return(OUTFILE_APPEND); }
 
-%{
-/* you need rules for the other reserved characters below */
+">"               { return(OUTFILE); }
 
-/* you will also need a rule that returns "strings" as WORDS */
-%}
+"2>>"             { return(ERRFILE_APPEND); }
 
-
-
-.		{
-    /* if we haven't matched anything yet, then it's illegal */
-    fprintf(stdout, "scanner: Bad character '%c'\n", *yytext);
-}
+"2>"              { return(ERRFILE); }
 
 
 %%
+
+/* Optional C functions for the lexer, such as yywrap or helpers */

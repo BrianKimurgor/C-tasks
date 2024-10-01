@@ -1,11 +1,3 @@
-Terminals unused in grammar
-
-    OUTFILE
-    OUTFILE_APPEND
-    ERRFILE
-    ERRFILE_APPEND
-
-
 Grammar
 
     0 $accept: input $end
@@ -36,6 +28,10 @@ Grammar
    16          | ε
 
    17 redir: INFILE WORD
+   18      | OUTFILE WORD
+   19      | OUTFILE_APPEND WORD
+   20      | ERRFILE WORD
+   21      | ERRFILE_APPEND WORD
 
 
 Terminals, with rules where they appear
@@ -45,11 +41,11 @@ Terminals, with rules where they appear
     EOLN (258) 8
     PIPE (259) 10
     INFILE (260) 17
-    OUTFILE (261)
-    OUTFILE_APPEND (262)
-    ERRFILE (263)
-    ERRFILE_APPEND (264)
-    WORD <string> (265) 11 14 17
+    OUTFILE (261) 18
+    OUTFILE_APPEND (262) 19
+    ERRFILE (263) 20
+    ERRFILE_APPEND (264) 21
+    WORD <string> (265) 11 14 17 18 19 20 21
 
 
 Nonterminals, with rules where they appear
@@ -84,7 +80,7 @@ Nonterminals, with rules where they appear
         on left: 15 16
         on right: 11 15
     redir <predir> (21)
-        on left: 17
+        on left: 17 18 19 20 21
         on right: 15
 
 
@@ -210,12 +206,16 @@ State 12
 
    11 cmd: WORD optargs • optredirs
 
-    INFILE  shift, and go to state 18
+    INFILE          shift, and go to state 18
+    OUTFILE         shift, and go to state 19
+    OUTFILE_APPEND  shift, and go to state 20
+    ERRFILE         shift, and go to state 21
+    ERRFILE_APPEND  shift, and go to state 22
 
     $default  reduce using rule 16 (optredirs)
 
-    optredirs  go to state 19
-    redir      go to state 20
+    optredirs  go to state 23
+    redir      go to state 24
 
 
 State 13
@@ -226,7 +226,7 @@ State 13
 
     $default  reduce using rule 13 (optargs)
 
-    optargs  go to state 21
+    optargs  go to state 25
     arg      go to state 13
 
 
@@ -257,7 +257,7 @@ State 17
 
     WORD  shift, and go to state 3
 
-    line  go to state 22
+    line  go to state 26
     cmd   go to state 9
 
 
@@ -265,50 +265,110 @@ State 18
 
    17 redir: INFILE • WORD
 
-    WORD  shift, and go to state 23
+    WORD  shift, and go to state 27
 
 
 State 19
+
+   18 redir: OUTFILE • WORD
+
+    WORD  shift, and go to state 28
+
+
+State 20
+
+   19 redir: OUTFILE_APPEND • WORD
+
+    WORD  shift, and go to state 29
+
+
+State 21
+
+   20 redir: ERRFILE • WORD
+
+    WORD  shift, and go to state 30
+
+
+State 22
+
+   21 redir: ERRFILE_APPEND • WORD
+
+    WORD  shift, and go to state 31
+
+
+State 23
 
    11 cmd: WORD optargs optredirs •
 
     $default  reduce using rule 11 (cmd)
 
 
-State 20
+State 24
 
    15 optredirs: redir • optredirs
 
-    INFILE  shift, and go to state 18
+    INFILE          shift, and go to state 18
+    OUTFILE         shift, and go to state 19
+    OUTFILE_APPEND  shift, and go to state 20
+    ERRFILE         shift, and go to state 21
+    ERRFILE_APPEND  shift, and go to state 22
 
     $default  reduce using rule 16 (optredirs)
 
-    optredirs  go to state 24
-    redir      go to state 20
+    optredirs  go to state 32
+    redir      go to state 24
 
 
-State 21
+State 25
 
    12 optargs: arg optargs •
 
     $default  reduce using rule 12 (optargs)
 
 
-State 22
+State 26
 
    10 line: cmd PIPE line •
 
     $default  reduce using rule 10 (line)
 
 
-State 23
+State 27
 
    17 redir: INFILE WORD •
 
     $default  reduce using rule 17 (redir)
 
 
-State 24
+State 28
+
+   18 redir: OUTFILE WORD •
+
+    $default  reduce using rule 18 (redir)
+
+
+State 29
+
+   19 redir: OUTFILE_APPEND WORD •
+
+    $default  reduce using rule 19 (redir)
+
+
+State 30
+
+   20 redir: ERRFILE WORD •
+
+    $default  reduce using rule 20 (redir)
+
+
+State 31
+
+   21 redir: ERRFILE_APPEND WORD •
+
+    $default  reduce using rule 21 (redir)
+
+
+State 32
 
    15 optredirs: redir optredirs •
 
