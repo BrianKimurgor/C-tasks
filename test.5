@@ -1,0 +1,62 @@
+#!/bin/sh
+#
+# students must NOT change this file in any way!!!
+PATH=/bin:/usr/bin
+TEST=$0
+
+# this is the input lines to use
+cat > $0.input << END
+echo "All of these commands have fatal errors"
+
+cat < i < i
+
+cat > o > o
+
+cat > o >> O
+
+cat 2> e 2> e
+
+cat 2> e 2>> E
+
+cat < i > o < i2 > o2
+
+a < i | b < i2 | c < i3 | d < i4
+
+a > o | b > o2 | c > o3 | d > O4
+END
+
+# this is the correct output
+# this is the output they should create
+cat > $TEST.correct << END
+========== line 1 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'All of these commands have fatal errors'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+Error on line 3: illegal redirection
+Error on line 5: illegal redirection
+Error on line 7: illegal redirection
+Error on line 9: illegal redirection
+Error on line 11: illegal redirection
+Error on line 13: illegal redirection
+Error on line 13: illegal redirection
+Error on line 15: illegal redirection
+Error on line 15: illegal redirection
+Error on line 15: illegal redirection
+Error on line 17: illegal redirection
+Error on line 17: illegal redirection
+Error on line 17: illegal redirection
+END
+
+# don't change anything else
+./bash < $0.input > $TEST.myoutput 2>&1
+if cmp -s $TEST.correct $TEST.myoutput; then
+    echo "PASSES"; exit 0
+else
+    echo "FAILS"; 
+    diff $TEST.correct $TEST.myoutput
+    exit 99
+fi

@@ -1,0 +1,10 @@
+cat
+dog
+cat cat
+cat cat cat
+cat dog
+cat cat dog dog
+cat dog bear
+cat cat dog dogcatcher
+cat bear
+

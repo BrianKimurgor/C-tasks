@@ -1,0 +1,215 @@
+#!/bin/sh
+#
+# students must NOT change this file in any way!!!
+PATH=/bin:/usr/bin
+TEST=$0
+
+# this is the input lines to use
+cat > $0.input << END
+cat a b c d e f g h i j k l m n o p q r s t u v w x y z
+/bin/cc "this is all one word"
+/bin/ls "What about"this string"of stuff?"
+"command names can be quoted, of course" /etc/motd
+"/bin/ls" "/tmp"
+echo "test harder strings" "||<<>>||>&>&"
+
+echo "Pipe test"
+a|b|c|d
+echo test | a | b | c 1 2 3 | d
+c1 <i 2>e1 | c2 2>e2 | c3 2>e3 | c4 2>e4 >> O
+grep foo </tmp/foo.input | sort | more 2>> ~/More.out
+
+END
+
+# this is the correct output
+# this is the output they should create
+cat > $TEST.correct << END
+========== line 1 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+    argv[1]: 'a'
+    argv[2]: 'b'
+    argv[3]: 'c'
+    argv[4]: 'd'
+    argv[5]: 'e'
+    argv[6]: 'f'
+    argv[7]: 'g'
+    argv[8]: 'h'
+    argv[9]: 'i'
+    argv[10]: 'j'
+    argv[11]: 'k'
+    argv[12]: 'l'
+    argv[13]: 'm'
+    argv[14]: 'n'
+    argv[15]: 'o'
+    argv[16]: 'p'
+    argv[17]: 'q'
+    argv[18]: 'r'
+    argv[19]: 's'
+    argv[20]: 't'
+    argv[21]: 'u'
+    argv[22]: 'v'
+    argv[23]: 'w'
+    argv[24]: 'x'
+    argv[25]: 'y'
+    argv[26]: 'z'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 2 ==========
+Command name: '/bin/cc'
+    argv[0]: '/bin/cc'
+    argv[1]: 'this is all one word'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 3 ==========
+Command name: '/bin/ls'
+    argv[0]: '/bin/ls'
+    argv[1]: 'What about'
+    argv[2]: 'this'
+    argv[3]: 'string'
+    argv[4]: 'of stuff?'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 4 ==========
+Command name: 'command names can be quoted, of course'
+    argv[0]: 'command names can be quoted, of course'
+    argv[1]: '/etc/motd'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 5 ==========
+Command name: '/bin/ls'
+    argv[0]: '/bin/ls'
+    argv[1]: '/tmp'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 6 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'test harder strings'
+    argv[2]: '||<<>>||>&>&'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 8 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'Pipe test'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 9 ==========
+Command name: 'a'
+    argv[0]: 'a'
+  stdin:  UNDIRECTED
+  stdout: PIPE1
+  stderr: UNDIRECTED
+Command name: 'b'
+    argv[0]: 'b'
+  stdin:  PIPE1
+  stdout: PIPE2
+  stderr: UNDIRECTED
+Command name: 'c'
+    argv[0]: 'c'
+  stdin:  PIPE2
+  stdout: PIPE3
+  stderr: UNDIRECTED
+Command name: 'd'
+    argv[0]: 'd'
+  stdin:  PIPE3
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 10 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'test'
+  stdin:  UNDIRECTED
+  stdout: PIPE1
+  stderr: UNDIRECTED
+Command name: 'a'
+    argv[0]: 'a'
+  stdin:  PIPE1
+  stdout: PIPE2
+  stderr: UNDIRECTED
+Command name: 'b'
+    argv[0]: 'b'
+  stdin:  PIPE2
+  stdout: PIPE3
+  stderr: UNDIRECTED
+Command name: 'c'
+    argv[0]: 'c'
+    argv[1]: '1'
+    argv[2]: '2'
+    argv[3]: '3'
+  stdin:  PIPE3
+  stdout: PIPE4
+  stderr: UNDIRECTED
+Command name: 'd'
+    argv[0]: 'd'
+  stdin:  PIPE4
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 11 ==========
+Command name: 'c1'
+    argv[0]: 'c1'
+  stdin:  'i'
+  stdout: PIPE1
+  stderr: 'e1'
+Command name: 'c2'
+    argv[0]: 'c2'
+  stdin:  PIPE1
+  stdout: PIPE2
+  stderr: 'e2'
+Command name: 'c3'
+    argv[0]: 'c3'
+  stdin:  PIPE2
+  stdout: PIPE3
+  stderr: 'e3'
+Command name: 'c4'
+    argv[0]: 'c4'
+  stdin:  PIPE3
+  stdout: 'O' (append)
+  stderr: 'e4'
+
+========== line 12 ==========
+Command name: 'grep'
+    argv[0]: 'grep'
+    argv[1]: 'foo'
+  stdin:  '/tmp/foo.input'
+  stdout: PIPE1
+  stderr: UNDIRECTED
+Command name: 'sort'
+    argv[0]: 'sort'
+  stdin:  PIPE1
+  stdout: PIPE2
+  stderr: UNDIRECTED
+Command name: 'more'
+    argv[0]: 'more'
+  stdin:  PIPE2
+  stdout: UNDIRECTED
+  stderr: '~/More.out' (append)
+
+END
+
+# don't change anything else
+./bash < $0.input > $TEST.myoutput 2>&1
+if cmp -s $TEST.correct $TEST.myoutput; then
+    echo "PASSES"; exit 0
+else
+    echo "FAILS"; 
+    diff $TEST.correct $TEST.myoutput
+    exit 99
+fi

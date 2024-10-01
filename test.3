@@ -1,0 +1,101 @@
+#!/bin/sh
+#
+# students must NOT change this file in any way!!!
+PATH=/bin:/usr/bin
+TEST=$0
+
+# this is the input lines to use
+cat > $0.input << END
+echo Hello World
+/bin/cat < /etc/motd
+/bin/cat > outfile
+echo "this is a test" | cat
+gcc -c -Wall file.c 2>> ERRS
+cat < infile | tr "a-z" "A-Z" | cat 2>caterrs | wc -l > out
+END
+
+# this is the correct output
+# this is the output they should create
+cat > $TEST.correct << END
+========== line 1 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'Hello'
+    argv[2]: 'World'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 2 ==========
+Command name: '/bin/cat'
+    argv[0]: '/bin/cat'
+  stdin:  '/etc/motd'
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 3 ==========
+Command name: '/bin/cat'
+    argv[0]: '/bin/cat'
+  stdin:  UNDIRECTED
+  stdout: 'outfile'
+  stderr: UNDIRECTED
+
+========== line 4 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'this is a test'
+  stdin:  UNDIRECTED
+  stdout: PIPE1
+  stderr: UNDIRECTED
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  PIPE1
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 5 ==========
+Command name: 'gcc'
+    argv[0]: 'gcc'
+    argv[1]: '-c'
+    argv[2]: '-Wall'
+    argv[3]: 'file.c'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: 'ERRS' (append)
+
+========== line 6 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'infile'
+  stdout: PIPE1
+  stderr: UNDIRECTED
+Command name: 'tr'
+    argv[0]: 'tr'
+    argv[1]: 'a-z'
+    argv[2]: 'A-Z'
+  stdin:  PIPE1
+  stdout: PIPE2
+  stderr: UNDIRECTED
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  PIPE2
+  stdout: PIPE3
+  stderr: 'caterrs'
+Command name: 'wc'
+    argv[0]: 'wc'
+    argv[1]: '-l'
+  stdin:  PIPE3
+  stdout: 'out'
+  stderr: UNDIRECTED
+
+END
+
+# don't change anything else
+./bash < $0.input > $TEST.myoutput 2>&1
+if cmp -s $TEST.correct $TEST.myoutput; then
+    echo "PASSES"; exit 0
+else
+    echo "FAILS"; 
+    diff $TEST.correct $TEST.myoutput
+    exit 99
+fi

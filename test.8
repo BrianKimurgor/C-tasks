@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# students must NOT change this file in any way!!!
+PATH=/bin:/usr/bin
+TEST=$0
+
+# this is the input lines to use
+cat > $0.input << END
+echo "This file contains errors"
+
+echo "I am a valid command and should appear!!"
+
+a|b|
+
+a | | c
+
+a | b < i > o | c
+
+echo "OK, how about this?" > & error
+
+echo "And this" > > out
+
+echo strange >>> stranger
+
+echo "This last command is valid!"
+END
+
+# this is the correct output
+# this is the output they should create
+cat > $TEST.correct << END
+========== line 1 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'This file contains errors'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 3 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'I am a valid command and should appear!!'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+Error on line 5: syntax error
+Error on line 7: syntax error
+Error on line 9: illegal redirection
+Error on line 9: illegal redirection
+Error on line 11: syntax error
+Error on line 13: syntax error
+Error on line 15: syntax error
+========== line 17 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'This last command is valid!'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+END
+
+# don't change anything else
+./bash < $0.input > $TEST.myoutput 2>&1
+if cmp -s $TEST.correct $TEST.myoutput; then
+    echo "PASSES"; exit 0
+else
+    echo "FAILS"; 
+    diff $TEST.correct $TEST.myoutput
+    exit 99
+fi

@@ -1,0 +1,214 @@
+#!/bin/sh
+#
+# students must NOT change this file in any way!!!
+PATH=/bin:/usr/bin
+TEST=$0
+
+# this is the input lines to use
+cat > $0.input << END
+echo "All of these redirections are valid"
+
+cat  < i
+cat  > o
+cat  >> O
+cat 2> e
+cat 2>> E
+
+cat 2> e  > o
+cat 2>> E  > o
+cat  < i 2> e
+cat  < i  > o
+
+cat < i 2> e  > o 
+cat < i 2>> E  > o 
+cat < i 2> e  >> O
+
+echo "The rest are in a different order, but should also be valid"
+
+cat  > o 2> e
+
+cat < i  > o 2> e 
+
+cat > o < i
+
+cat 2> e < i
+
+cat > o < i 2> e 
+
+cat > o 2> e < i 
+
+cat 2> e < i > o 
+
+cat 2> e > o < i 
+END
+
+# this is the correct output
+# this is the output they should create
+cat > $TEST.correct << END
+========== line 1 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'All of these redirections are valid'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 3 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 4 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: 'o'
+  stderr: UNDIRECTED
+
+========== line 5 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: 'O' (append)
+  stderr: UNDIRECTED
+
+========== line 6 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: 'e'
+
+========== line 7 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: 'E' (append)
+
+========== line 9 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 10 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: 'o'
+  stderr: 'E' (append)
+
+========== line 11 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: UNDIRECTED
+  stderr: 'e'
+
+========== line 12 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: UNDIRECTED
+
+========== line 14 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 15 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'E' (append)
+
+========== line 16 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'O' (append)
+  stderr: 'e'
+
+========== line 18 ==========
+Command name: 'echo'
+    argv[0]: 'echo'
+    argv[1]: 'The rest are in a different order, but should also be valid'
+  stdin:  UNDIRECTED
+  stdout: UNDIRECTED
+  stderr: UNDIRECTED
+
+========== line 20 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  UNDIRECTED
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 22 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 24 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: UNDIRECTED
+
+========== line 26 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: UNDIRECTED
+  stderr: 'e'
+
+========== line 28 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 30 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 32 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'e'
+
+========== line 34 ==========
+Command name: 'cat'
+    argv[0]: 'cat'
+  stdin:  'i'
+  stdout: 'o'
+  stderr: 'e'
+
+END
+
+# don't change anything else
+./bash < $0.input > $TEST.myoutput 2>&1
+if cmp -s $TEST.correct $TEST.myoutput; then
+    echo "PASSES"; exit 0
+else
+    echo "FAILS"; 
+    diff $TEST.correct $TEST.myoutput
+    exit 99
+fi
