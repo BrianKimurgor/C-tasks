@@ -61,7 +61,7 @@ line : cmd { $$ = $1; }
          $$->command = $1->command; // Correct field if you intended to set the command name
          $$->args = $1->args;
          $$->redirs = $1->redirs;
-         $$->next = $3;   // Link the next command in pipeline
+         $$->next = $3;  // Link the next command in the pipeline
      }
      ;
 

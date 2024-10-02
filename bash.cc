@@ -57,29 +57,32 @@ int main(int argc, char *argv[])
  */
 void doline(struct command *pcmd)
 {
-    int line_number = 1;
+    static int line_number = 1;  // Line number across multiple calls to doline()
+
     while (pcmd != NULL) {
+        // Print the line header
         printf("========== line %d ==========\n", line_number);
         printf("Command name: '%s'\n", pcmd->command);
-        
-        // Display arguments
-        int i = 0;
+
+        // Display the arguments
         struct args *parg = pcmd->args;
+        int arg_index = 0;
         while (parg != NULL) {
-            printf("argv[%d]: '%s'\n", i++, parg->arg);
+            printf("    argv[%d]: '%s'\n", arg_index++, parg->arg);  // 4 spaces indentation
             parg = parg->next;
         }
 
-        // Handle stdin, stdout, and stderr redirection
-        printf("stdin: %s\n", pcmd->infile ? pcmd->infile : "UNDIRECTED");
-        printf("stdout: %s\n", pcmd->outfile ? pcmd->outfile : "UNDIRECTED");
-        printf("stderr: %s\n", pcmd->errfile ? (pcmd->error_append ? pcmd->errfile : pcmd->errfile) : "UNDIRECTED");
+        // Display redirection info (stdin, stdout, stderr)
+        printf("  stdin:  %s\n", pcmd->infile ? pcmd->infile : "UNDIRECTED");
+        printf("  stdout: %s\n", pcmd->outfile ? (pcmd->output_append ? pcmd->outfile : pcmd->outfile) : "UNDIRECTED");
+        printf("  stderr: %s\n", pcmd->errfile ? (pcmd->error_append ? pcmd->errfile : pcmd->errfile) : "UNDIRECTED");
 
-        // Check if there is another command in the pipeline
+        // Move to the next command in the pipeline
         pcmd = pcmd->next;
-        line_number++;
+        line_number++;  // Increment line number for each command, even if it's part of a pipeline
     }
 }
+
 
 
 /*
