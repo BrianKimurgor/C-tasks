@@ -23,6 +23,9 @@ struct command {
     char *argv[MAX_ARGS];  // Argument array
     char *infile;          // Input file
     char *outfile;         // Output file
+    char *stdin;
+    char *stdout;
+    char *stderr;
     char *errfile;         // Error file
     struct args *args;     // Linked list of arguments
     struct redirs *redirs; // Linked list of redirections
@@ -33,6 +36,9 @@ struct command {
     struct command *next;   // Pointer to the next command in a pipeline
 };
 
+// Global variable for the parsed command
+extern struct command *parsed_command;
+
 
 /* externals */
 extern int yydebug;
@@ -41,6 +47,9 @@ extern int lines;  // Defined and updated by parser, used by bash.cc
 
 /* Use THIS routine instead of malloc */
 void *MallocZ(int numbytes);
+
+void handle_redirections(struct redirs *redirection, struct command *pcmd);
+
 
 /* Global routine declarations */
 void doline(struct command *pass);

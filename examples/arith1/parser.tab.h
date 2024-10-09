@@ -55,13 +55,11 @@ extern int yydebug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     EOLN = 258,                    /* EOLN  */
-    PIPE = 259,                    /* PIPE  */
-    INFILE = 260,                  /* INFILE  */
-    OUTFILE = 261,                 /* OUTFILE  */
-    OUTFILE_APPEND = 262,          /* OUTFILE_APPEND  */
-    ERRFILE = 263,                 /* ERRFILE  */
-    ERRFILE_APPEND = 264,          /* ERRFILE_APPEND  */
-    WORD = 265                     /* WORD  */
+    PLUS = 259,                    /* PLUS  */
+    MINUS = 260,                   /* MINUS  */
+    TIMES = 261,                   /* TIMES  */
+    DIVIDE = 262,                  /* DIVIDE  */
+    NUMBER = 263                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -70,15 +68,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 23 "parser.y"
-
-    char *string;
-    struct command *pcmd;
-    struct args *pargs;
-    struct redirs *predir;
+#line 28 "parser.y"
+ /* the types that we use in the tokens */
     int number;
+    int operator;
+    struct assignment *pass;
+    struct opchain *pop;
 
-#line 82 "parser.tab.h"
+#line 79 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
