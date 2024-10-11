@@ -16,6 +16,7 @@ extern "C" {
 int debug = 0;
 int lines = 0;
 
+const char* wrap_in_quotes(const char* str);
 void execute_command(struct command *pcmd);
 void execute_pipeline(struct command *pcmd);
 void handle_redirections(struct redirs *redirection, struct command *pcmd);
@@ -34,6 +35,11 @@ int main(int argc, char *argv[])
                 printf("Parsing error occurred on line %d\n", lines);
             }
             continue; // Skip to the next command after an error
+        }
+        
+        // Exit loop when EOF is reached
+        if (feof(stdin)) {
+            break;
         }
     }
 
@@ -76,15 +82,34 @@ void doline(struct command *pcmd)
             parg = parg->next;
         }
 
-        // Display redirection info (stdin, stdout, stderr)
-        printf("  stdin:  %s\n", pcmd->infile ? pcmd->infile : "UNDIRECTED");
-        printf("  stdout: %s\n", pcmd->outfile ? pcmd->outfile : "UNDIRECTED");
-        printf("  stderr: %s\n", pcmd->errfile ? pcmd->errfile : "UNDIRECTED");
+        // Display redirection info with append handling
+        printf("  stdin:  %s\n", pcmd->infile ? wrap_in_quotes(pcmd->infile) : "UNDIRECTED");
+
+        // Handle append mode for stdout
+        if (pcmd->output_append) {
+            printf("  stdout: %s (append)\n", pcmd->outfile ? wrap_in_quotes(pcmd->outfile) : "UNDIRECTED");
+        } else {
+            printf("  stdout: %s\n", pcmd->outfile ? wrap_in_quotes(pcmd->outfile) : "UNDIRECTED");
+        }
+
+        // Handle append mode for stderr
+        if (pcmd->error_append) {
+            printf("  stderr: %s (append)\n", pcmd->errfile ? wrap_in_quotes(pcmd->errfile) : "UNDIRECTED");
+        } else {
+            printf("  stderr: %s\n", pcmd->errfile ? wrap_in_quotes(pcmd->errfile) : "UNDIRECTED");
+        }
 
         // Move to the next command in the pipeline
         pcmd = pcmd->next;
         line_number++;  // Increment line number for each command, even if it's part of a pipeline
     }
+}
+
+// Utility function to wrap file names in quotes
+const char* wrap_in_quotes(const char* str) {
+    static char buffer[1024];  // Temporary buffer for the quoted string
+    snprintf(buffer, sizeof(buffer), "'%s'", str);  // Wrap the string in single quotes
+    return buffer;
 }
 
 void execute_command(struct command *pcmd)
@@ -110,45 +135,11 @@ void execute_command(struct command *pcmd)
         exit(1); // Ensure to exit on failure
     } else if (pid > 0) { // Parent process
         int status;
+        // Wait for the child process to finish
         waitpid(pid, &status, 0);
     } else {
         perror("fork failed");
     }
-}
-
-void execute_pipeline(struct command *pcmd)
-{
-    int pipefd[2];
-    pid_t pid;
-    struct command *current = pcmd;
-
-    while (current && current->next) {
-        if (pipe(pipefd) == -1) {
-            perror("pipe failed");
-            return;
-        }
-
-        pid = fork();
-        if (pid == 0) { // Child process
-            close(pipefd[0]); // Close the read end
-            dup2(pipefd[1], STDOUT_FILENO); // Redirect stdout to pipe write end
-            close(pipefd[1]); // Close write end after redirecting
-
-            handle_redirections(current->redirs, current);
-            execute_command(current);
-            exit(0);
-        } else if (pid > 0) { // Parent process
-            close(pipefd[1]); // Close the write end
-            dup2(pipefd[0], STDIN_FILENO); // Redirect stdin to pipe read end
-            close(pipefd[0]); // Close read end after redirecting
-            current = current->next; // Move to the next command
-        } else {
-            perror("fork failed");
-        }
-    }
-
-    handle_redirections(current->redirs, current);
-    execute_command(current);
 }
 
 void handle_redirections(struct redirs *redirection, struct command *pcmd)
@@ -160,60 +151,71 @@ void handle_redirections(struct redirs *redirection, struct command *pcmd)
                 fd = open(redirection->filename, O_RDONLY);
                 if (fd == -1) {
                     perror("Failed to open input file");
+                    cerr << "Error on line " << pcmd->line_number << ": Failed to open input file" << endl;
+                    return; // Exit early if we can't open the input file
                 } else {
                     dup2(fd, STDIN_FILENO);
                     close(fd);
-                    pcmd->infile = redirection->filename; // Update infile for doline logging
+                    pcmd->infile = redirection->filename;
                 }
                 break;
             case OUTFILE:
                 fd = open(redirection->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 if (fd == -1) {
                     perror("Failed to open output file");
+                    cerr << "Error on line " << pcmd->line_number << ": Failed to open output file" << endl;
+                    return; // Exit early if we can't open the output file
                 } else {
                     dup2(fd, STDOUT_FILENO);
                     close(fd);
-                    pcmd->outfile = redirection->filename; // Update outfile for doline logging
-                    pcmd->output_append = 0; // Not append mode
+                    pcmd->outfile = redirection->filename;
+                    pcmd->output_append = 0;
                 }
                 break;
             case OUTFILE_APPEND:
                 fd = open(redirection->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
                 if (fd == -1) {
                     perror("Failed to open output file (append)");
+                    cerr << "Error on line " << pcmd->line_number << ": Failed to open output file (append)" << endl;
+                    return; // Exit early if we can't open the output file (append)
                 } else {
                     dup2(fd, STDOUT_FILENO);
                     close(fd);
-                    pcmd->outfile = redirection->filename; // Update outfile for doline logging
-                    pcmd->output_append = 1; // Append mode
+                    pcmd->outfile = redirection->filename;
+                    pcmd->output_append = 1;
                 }
                 break;
             case ERRFILE:
                 fd = open(redirection->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 if (fd == -1) {
                     perror("Failed to open error file");
+                    cerr << "Error on line " << pcmd->line_number << ": Failed to open error file" << endl;
+                    return; // Exit early if we can't open the error file
                 } else {
                     dup2(fd, STDERR_FILENO);
                     close(fd);
-                    pcmd->errfile = redirection->filename; // Update errfile for doline logging
-                    pcmd->error_append = 0; // Not append mode
+                    pcmd->errfile = redirection->filename;
+                    pcmd->error_append = 0;
                 }
                 break;
             case ERRFILE_APPEND:
                 fd = open(redirection->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
                 if (fd == -1) {
                     perror("Failed to open error file (append)");
+                    cerr << "Error on line " << pcmd->line_number << ": Failed to open error file (append)" << endl;
+                    return; // Exit early if we can't open the error file (append)
                 } else {
                     dup2(fd, STDERR_FILENO);
                     close(fd);
-                    pcmd->errfile = redirection->filename; // Update errfile for doline logging
-                    pcmd->error_append = 1; // Append mode
+                    pcmd->errfile = redirection->filename;
+                    pcmd->error_append = 1;
                 }
                 break;
             default:
-                cerr << "Unknown redirection type\n";
-                break;
+                cerr << "Unknown redirection type on line " << pcmd->line_number << endl;
+                return; // Exit early for unknown redirection types
         }
-        redirection = redirection->next; // Move to the next redirection
+        redirection = redirection->next;
     }
 }
+

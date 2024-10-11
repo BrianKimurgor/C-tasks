@@ -34,6 +34,7 @@ struct command {
     char error_append;      /* boolean: append stderr? */
 
     struct command *next;   // Pointer to the next command in a pipeline
+    int line_number;
 };
 
 // Global variable for the parsed command
