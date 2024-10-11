@@ -1,0 +1,460 @@
+Grammar
+
+    0 $accept: input $end
+
+    1 input: lines
+    2      | %empty
+
+    3 lines: oneline
+    4      | oneline lines
+
+    5 oneline: line eoln
+    6        | eoln
+
+    7 eoln: EOLN
+
+    8 line: cmd
+    9     | if_block
+   10     | cmd PIPE line
+
+   11 if_block: IF condition THEN lines ELSE lines FI
+   12         | IF condition THEN lines FI
+
+   13 cmd: WORD optargs optredirs
+
+   14 optargs: arg optargs
+   15        | %empty
+
+   16 arg: WORD
+
+   17 optredirs: redir optredirs
+   18          | %empty
+
+   19 redir: INFILE WORD
+   20      | OUTFILE WORD
+   21      | OUTFILE_APPEND WORD
+   22      | ERRFILE WORD
+   23      | ERRFILE_APPEND WORD
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    IF (258) 11 12
+    THEN (259) 11 12
+    ELSE (260) 11
+    FI (261) 11 12
+    condition (262) 11 12
+    WORD <string> (263) 13 16 19 20 21 22 23
+    EOLN (264) 7
+    PIPE (265) 10
+    INFILE (266) 19
+    OUTFILE (267) 20
+    OUTFILE_APPEND (268) 21
+    ERRFILE (269) 22
+    ERRFILE_APPEND (270) 23
+
+
+Nonterminals, with rules where they appear
+
+    $accept (16)
+        on left: 0
+    input (17)
+        on left: 1 2
+        on right: 0
+    lines (18)
+        on left: 3 4
+        on right: 1 4 11 12
+    oneline (19)
+        on left: 5 6
+        on right: 3 4
+    eoln (20)
+        on left: 7
+        on right: 5 6
+    line <pcmd> (21)
+        on left: 8 9 10
+        on right: 5 10
+    if_block (22)
+        on left: 11 12
+        on right: 9
+    cmd <pcmd> (23)
+        on left: 13
+        on right: 8 10
+    optargs <pargs> (24)
+        on left: 14 15
+        on right: 13 14
+    arg <pargs> (25)
+        on left: 16
+        on right: 14
+    optredirs <predir> (26)
+        on left: 17 18
+        on right: 13 17
+    redir <predir> (27)
+        on left: 19 20 21 22 23
+        on right: 17
+
+
+State 0
+
+    0 $accept: . input $end
+
+    IF    shift, and go to state 1
+    WORD  shift, and go to state 2
+    EOLN  shift, and go to state 3
+
+    $default  reduce using rule 2 (input)
+
+    input     go to state 4
+    lines     go to state 5
+    oneline   go to state 6
+    eoln      go to state 7
+    line      go to state 8
+    if_block  go to state 9
+    cmd       go to state 10
+
+
+State 1
+
+   11 if_block: IF . condition THEN lines ELSE lines FI
+   12         | IF . condition THEN lines FI
+
+    condition  shift, and go to state 11
+
+
+State 2
+
+   13 cmd: WORD . optargs optredirs
+
+    WORD  shift, and go to state 12
+
+    $default  reduce using rule 15 (optargs)
+
+    optargs  go to state 13
+    arg      go to state 14
+
+
+State 3
+
+    7 eoln: EOLN .
+
+    $default  reduce using rule 7 (eoln)
+
+
+State 4
+
+    0 $accept: input . $end
+
+    $end  shift, and go to state 15
+
+
+State 5
+
+    1 input: lines .
+
+    $default  reduce using rule 1 (input)
+
+
+State 6
+
+    3 lines: oneline .
+    4      | oneline . lines
+
+    IF    shift, and go to state 1
+    WORD  shift, and go to state 2
+    EOLN  shift, and go to state 3
+
+    $default  reduce using rule 3 (lines)
+
+    lines     go to state 16
+    oneline   go to state 6
+    eoln      go to state 7
+    line      go to state 8
+    if_block  go to state 9
+    cmd       go to state 10
+
+
+State 7
+
+    6 oneline: eoln .
+
+    $default  reduce using rule 6 (oneline)
+
+
+State 8
+
+    5 oneline: line . eoln
+
+    EOLN  shift, and go to state 3
+
+    eoln  go to state 17
+
+
+State 9
+
+    9 line: if_block .
+
+    $default  reduce using rule 9 (line)
+
+
+State 10
+
+    8 line: cmd .
+   10     | cmd . PIPE line
+
+    PIPE  shift, and go to state 18
+
+    $default  reduce using rule 8 (line)
+
+
+State 11
+
+   11 if_block: IF condition . THEN lines ELSE lines FI
+   12         | IF condition . THEN lines FI
+
+    THEN  shift, and go to state 19
+
+
+State 12
+
+   16 arg: WORD .
+
+    $default  reduce using rule 16 (arg)
+
+
+State 13
+
+   13 cmd: WORD optargs . optredirs
+
+    INFILE          shift, and go to state 20
+    OUTFILE         shift, and go to state 21
+    OUTFILE_APPEND  shift, and go to state 22
+    ERRFILE         shift, and go to state 23
+    ERRFILE_APPEND  shift, and go to state 24
+
+    $default  reduce using rule 18 (optredirs)
+
+    optredirs  go to state 25
+    redir      go to state 26
+
+
+State 14
+
+   14 optargs: arg . optargs
+
+    WORD  shift, and go to state 12
+
+    $default  reduce using rule 15 (optargs)
+
+    optargs  go to state 27
+    arg      go to state 14
+
+
+State 15
+
+    0 $accept: input $end .
+
+    $default  accept
+
+
+State 16
+
+    4 lines: oneline lines .
+
+    $default  reduce using rule 4 (lines)
+
+
+State 17
+
+    5 oneline: line eoln .
+
+    $default  reduce using rule 5 (oneline)
+
+
+State 18
+
+   10 line: cmd PIPE . line
+
+    IF    shift, and go to state 1
+    WORD  shift, and go to state 2
+
+    line      go to state 28
+    if_block  go to state 9
+    cmd       go to state 10
+
+
+State 19
+
+   11 if_block: IF condition THEN . lines ELSE lines FI
+   12         | IF condition THEN . lines FI
+
+    IF    shift, and go to state 1
+    WORD  shift, and go to state 2
+    EOLN  shift, and go to state 3
+
+    lines     go to state 29
+    oneline   go to state 6
+    eoln      go to state 7
+    line      go to state 8
+    if_block  go to state 9
+    cmd       go to state 10
+
+
+State 20
+
+   19 redir: INFILE . WORD
+
+    WORD  shift, and go to state 30
+
+
+State 21
+
+   20 redir: OUTFILE . WORD
+
+    WORD  shift, and go to state 31
+
+
+State 22
+
+   21 redir: OUTFILE_APPEND . WORD
+
+    WORD  shift, and go to state 32
+
+
+State 23
+
+   22 redir: ERRFILE . WORD
+
+    WORD  shift, and go to state 33
+
+
+State 24
+
+   23 redir: ERRFILE_APPEND . WORD
+
+    WORD  shift, and go to state 34
+
+
+State 25
+
+   13 cmd: WORD optargs optredirs .
+
+    $default  reduce using rule 13 (cmd)
+
+
+State 26
+
+   17 optredirs: redir . optredirs
+
+    INFILE          shift, and go to state 20
+    OUTFILE         shift, and go to state 21
+    OUTFILE_APPEND  shift, and go to state 22
+    ERRFILE         shift, and go to state 23
+    ERRFILE_APPEND  shift, and go to state 24
+
+    $default  reduce using rule 18 (optredirs)
+
+    optredirs  go to state 35
+    redir      go to state 26
+
+
+State 27
+
+   14 optargs: arg optargs .
+
+    $default  reduce using rule 14 (optargs)
+
+
+State 28
+
+   10 line: cmd PIPE line .
+
+    $default  reduce using rule 10 (line)
+
+
+State 29
+
+   11 if_block: IF condition THEN lines . ELSE lines FI
+   12         | IF condition THEN lines . FI
+
+    ELSE  shift, and go to state 36
+    FI    shift, and go to state 37
+
+
+State 30
+
+   19 redir: INFILE WORD .
+
+    $default  reduce using rule 19 (redir)
+
+
+State 31
+
+   20 redir: OUTFILE WORD .
+
+    $default  reduce using rule 20 (redir)
+
+
+State 32
+
+   21 redir: OUTFILE_APPEND WORD .
+
+    $default  reduce using rule 21 (redir)
+
+
+State 33
+
+   22 redir: ERRFILE WORD .
+
+    $default  reduce using rule 22 (redir)
+
+
+State 34
+
+   23 redir: ERRFILE_APPEND WORD .
+
+    $default  reduce using rule 23 (redir)
+
+
+State 35
+
+   17 optredirs: redir optredirs .
+
+    $default  reduce using rule 17 (optredirs)
+
+
+State 36
+
+   11 if_block: IF condition THEN lines ELSE . lines FI
+
+    IF    shift, and go to state 1
+    WORD  shift, and go to state 2
+    EOLN  shift, and go to state 3
+
+    lines     go to state 38
+    oneline   go to state 6
+    eoln      go to state 7
+    line      go to state 8
+    if_block  go to state 9
+    cmd       go to state 10
+
+
+State 37
+
+   12 if_block: IF condition THEN lines FI .
+
+    $default  reduce using rule 12 (if_block)
+
+
+State 38
+
+   11 if_block: IF condition THEN lines ELSE lines . FI
+
+    FI  shift, and go to state 39
+
+
+State 39
+
+   11 if_block: IF condition THEN lines ELSE lines FI .
+
+    $default  reduce using rule 11 (if_block)
